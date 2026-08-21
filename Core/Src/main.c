@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "st7735.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -94,6 +94,8 @@ int main(void)
   MX_SPI2_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  ST7735_Init(0);
+  ST7735_FillScreen(BLACK);
 
   /* USER CODE END 2 */
 
@@ -104,6 +106,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    ST7735_SetRotation(0);
+    ST7735_WriteString(0, 0, "Hello World!", Font_16x26, WHITE, BLACK);
+    HAL_Delay(1000);
+    ST7735_FillScreen(BLACK);
   }
   /* USER CODE END 3 */
 }
