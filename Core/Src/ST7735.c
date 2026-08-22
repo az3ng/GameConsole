@@ -344,4 +344,7 @@ void ST7735_InvertColors(bool invert) {
     ST7735_Unselect();
 }
 
-
+void ST7735_FillScreen(uint16_t color)
+{
+    ST7735_FillRectangle(0, 0, _width, _height, color);
+}
