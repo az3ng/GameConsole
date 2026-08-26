@@ -103,6 +103,10 @@ int main(void)
   ST7735_Init(0);
   ST7735_FillScreen(BLACK);
 
+  //Button
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   /* USER CODE END 2 */
 
   /* Infinite loop */
