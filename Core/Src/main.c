@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "ST7735.h"
+#include "stm32f411xe.h"
 #include "stm32f4xx_hal_conf.h"
 /* USER CODE END Includes */
 
@@ -48,7 +49,14 @@ TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+float ballX=0f;
+float ballY=0f;
+float ballVelX=0f;
+float ballVelY=0f;
+float p1Y=0f;
+float p2Y =0f;
+float p1X=0f;
+float p2X=0f;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -74,7 +82,8 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  Rectangle player = { 50.0f, screenHeight / 2.0f - 40.0f, 20.0f, 80.0f };
+  paddleSpeed = 5.0f;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -98,15 +107,17 @@ int main(void)
   MX_SPI2_Init();
   MX_USART2_UART_Init();
   MX_TIM3_Init();
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  //HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   /* USER CODE BEGIN 2 */
   ST7735_Init(0);
   ST7735_FillScreen(BLACK);
 
   //Button
   GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -117,11 +128,22 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-
+    ST7735_FillRectangle(ballX, ballY, 10, 10, BLACK);
+    if (ballY==0){
+      
+    }
     //ST7735_FillScreen(RED);
     ST7735_SetRotation(0);
     ST7735_WriteString(0, 0, "Hello World!", Font_16x26, WHITE, BLACK);
     HAL_Delay(5000);
+    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) == GPIO_PIN_SET)
+    {
+      HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+    }
+    else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) ==GPIO_PIN_RESET){
+      
+      HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
+    }
   }
   /* USER CODE END 3 */
 }
