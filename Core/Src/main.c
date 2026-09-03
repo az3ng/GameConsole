@@ -25,6 +25,7 @@
 #include "stm32f411xe.h"
 #include "stm32f4xx_hal_conf.h"
 #include "stm32f4xx_hal_gpio.h"
+#include "stdlib.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,13 +51,15 @@ TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-float ballX=0.0f;
-float ballY=0.0f;
+float ballX=45.0f;
+float ballY=64.0f;
 float ballVelX=1.0f;
 float ballVelY=1.0f;
 float paddleVel=3.5f;
-float paddleX=0.0f;
-float paddleY=5.0f;
+float paddle1X=45.0f;
+float paddle1Y=150.0f;
+float paddle2X=45.0f;
+float paddle2Y=5.0f;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -118,6 +121,13 @@ int main(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  //Button 2
+  GPIO_InitTypeDef GPIO_InitStruct2 = {0};
+  GPIO_InitStruct2.Pin = GPIO_PIN_5 | GPIO_PIN_3;
+  GPIO_InitStruct2.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct2.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct2);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -127,51 +137,83 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    //ST7735_FillRectangle(paddleX, paddleY, 30, 5, WHITE);
-    //HAL_Delay(1000);
-    ST7735_FillRectangle(paddleX, paddleY, 30, 5, BLACK);
-    HAL_Delay(100);
-    //ST7735_FillRectangle(118, p2Y, 5, 30, WHITE);
-    //ST7735_FillRectangle(ballX, ballY, 5, 5, WHITE);
+    ST7735_FillRectangle(paddle2X, paddle2Y, 30, 5, BLACK);
+    HAL_Delay(50);
+    ST7735_FillRectangle(paddle1X, paddle1Y, 30, 5, BLACK);
+    HAL_Delay(50);
+    ST7735_FillRectangle(ballX, ballY, 3, 3, BLACK);
+    HAL_Delay(50);
 
-    //ball movement
-    /*
-    if (ballY <= 0 || ballY >= 128)
-    {
-      ballVelY = -ballVelY;
+    //ball initial direction
+    int initialDir = (rand() % 7)+1;
+    if (initialDir == 1){
+      ballY -= ballVelY;
+      ballX -=ballVelX;
     }
-    else if (ballX <= 0 || ballX >= 128)
-    {
-      ballVelX = -ballVelX;
+    else if (initialDir == 2){
+      ballVelX +=ballVelX;
+      ballVelY -=ballVelY;
     }
-    else{
+    else if (initialDir==3){
       ballY += ballVelY;
       ballX += ballVelX;
     }
-    */
-
-    //paddle movement
-    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) == GPIO_PIN_RESET)
-    {
-      paddleX+=paddleVel;
+    else if (initialDir == 4){
+      ballY += ballVelY;
+      ballX -= ballVelX;
     }
-    else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8) == GPIO_PIN_RESET)
-    {
-      paddleX-=paddleVel;
+    else if (initialDir == 5){
+      ballY-=ballVelY;
     }
-
-    if (paddleX < 0){
-      paddleX = 0;
+    else if (initialDir == 6){
+      ballY -= ballVelY;
+      ballX -= ballVelX;
     }
-    if (paddleX > 98){
-        paddleX = 98;
+    else if (initialDir == 7){
+      ballY += ballVelY;
     }
 
-    //ST7735_FillRectangle(ballX, ballY, 5, 5, WHITE);
-    ST7735_FillRectangle(paddleX, paddleY, 30, 5, WHITE);
-    HAL_Delay(100);
+    //paddle movement (player 1)
+    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) == GPIO_PIN_RESET){
+      paddle1X+=paddleVel;
+    }
+    else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8) == GPIO_PIN_RESET){
+      paddle1X-=paddleVel;
+    }
 
-    /*
+    //paddle movement (player 2)
+    if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5) == GPIO_PIN_RESET){
+      paddle2X+=paddleVel;
+    }
+    else if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3) == GPIO_PIN_RESET){
+      paddle2X-=paddleVel;
+    }
+
+    //ball hitting paddles
+    if (ballY <= paddle2Y && ballX >= paddle2X && ballX <= (paddle2X + 30)){
+      ballVelY -= ballVelY;
+    }
+    else if (ballY >= paddle1Y && ballX >= paddle1X && ballX <= (paddle1X + 30)){
+      ballVelY += ballVelY;
+    }
+
+    //boundaries for paddles
+    if ((paddle1X < 0) || (paddle2X < 0)){
+      paddle1X = 0;
+      paddle2X = 0;
+    }
+    if ((paddle1X > 98) || (paddle2X > 98)){
+      paddle1X = 98;
+      paddle2X = 98;
+    }
+
+    ST7735_FillRectangle(paddle2X, paddle2Y, 30, 5, WHITE);
+    HAL_Delay(50);
+    ST7735_FillRectangle(paddle1X, paddle1Y, 30, 5, WHITE);
+    HAL_Delay(50);
+    ST7735_FillRectangle(ballX, ballY, 3, 3, WHITE);
+
+    /* Initial tests for screen and button
     ST7735_FillScreen(RED);
     ST7735_SetRotation(0);
     ST7735_WriteString(0, 0, "Hello World!", Font_16x26, WHITE, BLACK);
