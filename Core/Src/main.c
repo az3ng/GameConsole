@@ -132,6 +132,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int initialDir = (rand() % 7)+1;
   while (1)
   {
     /* USER CODE END WHILE */
@@ -144,15 +145,15 @@ int main(void)
     ST7735_FillRectangle(ballX, ballY, 3, 3, BLACK);
     HAL_Delay(50);
 
+    /*
     //ball initial direction
-    int initialDir = (rand() % 7)+1;
     if (initialDir == 1){
       ballY -= ballVelY;
       ballX -=ballVelX;
     }
     else if (initialDir == 2){
-      ballVelX +=ballVelX;
-      ballVelY -=ballVelY;
+      ballX +=ballVelX;
+      ballY -=ballVelY;
     }
     else if (initialDir==3){
       ballY += ballVelY;
@@ -172,6 +173,9 @@ int main(void)
     else if (initialDir == 7){
       ballY += ballVelY;
     }
+    */
+    //ball movement
+    ballY -= ballVelY;
 
     //paddle movement (player 1)
     if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) == GPIO_PIN_RESET){
@@ -190,11 +194,11 @@ int main(void)
     }
 
     //ball hitting paddles
-    if (ballY <= paddle2Y && ballX >= paddle2X && ballX <= (paddle2X + 30)){
-      ballVelY -= ballVelY;
+    if (ballY <= paddle2Y+3 && ballX >= paddle2X && ballX <= paddle2X+30){
+      ballVelY = -ballVelY;
     }
-    else if (ballY >= paddle1Y && ballX >= paddle1X && ballX <= (paddle1X + 30)){
-      ballVelY += ballVelY;
+    if (ballY+3 >= paddle1Y && ballX >= paddle1X && ballX <= paddle1X+30){
+      ballVelY = -ballVelY;
     }
 
     //boundaries for paddles
@@ -205,6 +209,16 @@ int main(void)
     if ((paddle1X > 98) || (paddle2X > 98)){
       paddle1X = 98;
       paddle2X = 98;
+    }
+
+    //boundaries for ball
+    if (ballX < 0){
+      ballX = 0;
+      ballVelX = -ballVelX;
+    }
+    else if (ballX > 125){
+      ballX = 125;
+      ballVelX = -ballVelX;
     }
 
     ST7735_FillRectangle(paddle2X, paddle2Y, 30, 5, WHITE);
